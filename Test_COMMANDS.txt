@@ -1,0 +1,2 @@
+export TMPDIR=/tmp/patchstg_tmp; mkdir -p $TMPDIR
+python main.py --config ./config/SD.conf --mode test --model_file ./cpt/sd_model --cuda 0 --num_workers 0

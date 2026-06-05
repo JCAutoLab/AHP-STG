@@ -1,0 +1,24 @@
+# PatchSTG training commands (single-process, single-GPU)
+
+# 1) Activate environment
+conda activate patchstg
+
+# 2) Train one dataset (example)
+python main.py --config ./config/SD.conf --num_workers 8 --cuda 0
+
+# 3) Train all 4 datasets sequentially (one command)
+for d in SD CA GBA GLA; do python main.py --config ./config/${d}.conf --num_workers 8 --cuda 0; done
+
+# 4) Train all 4 datasets in parallel, one process per GPU (one command)
+for x in SD:0 CA:1 GBA:2 GLA:3; do d=${x%:*}; g=${x#*:}; nohup python main.py --config ./config/${d}.conf --num_workers 8 --cuda ${g} > ./log/train_${d}.out 2>&1 & done
+
+# 5) Monitor logs
+tail -f ./log/sd_log
+tail -f ./log/train_SD.out
+
+# 6) Train the future-time decoder optimized configs
+python main.py --config ./config/SD_future.conf --num_workers 8 --cuda 0
+for d in SD CA GBA GLA; do python main.py --config ./config/${d}_future.conf --num_workers 8 --cuda 0; done
+
+# 7) Stop all running trainings started by commands above
+pkill -f "python main.py --config ./config/"
